@@ -291,6 +291,7 @@
 
     "searchServiceName": {
       "type": "string",
+						   
       "defaultValue": "[concat(parameters('deploymentId'), '-as')]"
     },
     "searchServiceLocation": {
@@ -349,17 +350,17 @@
     "prcHostingPlanName": {
       "type": "string",
       "minLength": 1,
-      "defaultValue": "[concat(parameters('deploymentId'), '-prc-hp')]"
+      "defaultValue": "[concat(parameters('deploymentId'), '-cm-hp')]"
     },
     "repHostingPlanName": {
       "type": "string",
       "minLength": 1,
-      "defaultValue": "[concat(parameters('deploymentId'), '-rep-hp')]"
+      "defaultValue": "[concat(parameters('deploymentId'), '-cm-hp')]"
     },
     "xcBasicHostingPlanName": {
       "type": "string",
       "minLength": 1,
-      "defaultValue": "[concat(parameters('deploymentId'), '-xc-basic-hp')]"
+      "defaultValue": "[concat(parameters('deploymentId'), '-xc-resourceintensive-hp')]"
     },
     "xcResourceIntensiveHostingPlanName": {
       "type": "string",
@@ -540,9 +541,33 @@
       "type": "bool",
       "defaultValue": true
     },
+				 
+						 
+					   
+																	   
+	  
+					   
+						 
+					   
+																		 
+	  
     "deployExmDds": {
       "type": "bool",
+					   
       "defaultValue": false
+	  
+				
+						 
+					   
+																	  
+	  
+					  
+					  
+						 
+	  
+				
+						 
+													   
     }
 
   },
@@ -672,8 +697,51 @@
           },
           "authCertificatePassword": {
             "value": "[parameters('authCertificatePassword')]"
+			
+					  
+											  
           }
         }
+		
+					
+																										   
+	   
+	  
+	 
+														 
+																   
+												
+					 
+							  
+						 
+																																													  
+		  
+					   
+						   
+												   
+			
+					   
+											   
+			
+					   
+											   
+			
+							 
+													 
+			
+								
+														
+			
+					  
+											  
+			
+							
+													
+			
+					  
+											  
+		   
+		 
       }
     },
     {
@@ -735,6 +803,9 @@
           },
           "xcSearchWebAppName": {
             "value": "[parameters('xcSearchWebAppName')]"
+			
+					  
+											  
           }
         }
       },
