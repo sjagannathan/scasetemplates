@@ -3,58 +3,58 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "deploymentId": {
-      "value": ""
+      "value": "jagsasedemo"
     },
     "location": {
-      "value": ""
+      "value": "Central US"
     },
     "sitecoreAdminPassword": {
-      "value": ""
+      "value": "Rams@0903"
     },
     "licenseXml": {
-      "value": ""
+      "value": "C:\Jagan\Sitecore\Installer\tools\sc902xp\license.xml"
     },
     "repAuthenticationApiKey": {
-      "value": ""
+      "value": "7D63FAB33201783B8591A52661AE9764E9212070"
     },
     "sqlServerLogin": {
-      "value": ""
+      "value": "jagscadmin"
     },
     "sqlServerPassword": {
-      "value": ""
+      "value": "Rams@0903"
     },
     "cmMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_cm.scwdp.zip"
     },
     "cdMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_cd.scwdp.zip"
     },
     "prcMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_prc.scwdp.zip"
     },
     "repMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_rep.scwdp.zip"
     },
     "xcRefDataMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_xp1referencedata.scwdp.zip"
     },
     "xcCollectMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_xp1collection.scwdp.zip"
     },
     "xcSearchMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_xp1collectionsearch.scwdp.zip"
     },
     "maOpsMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_xp1marketingautomation.scwdp.zip"
     },
     "maRepMsDeployPackageUrl": {
-      "value": ""
+      "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_xp1marketingautomationreporting.scwdp.zip"
     }, 
     "authCertificateBlob":{
-      "value": ""
+      "value": "C:\Jagan\Sitecore\Installer\tools\sc902xp\scthumbprintcertificate.pfx"
     },
     "authCertificatePassword":{
-      "value": ""
+      "value": "Rams@0903"
     }
   }
 }
