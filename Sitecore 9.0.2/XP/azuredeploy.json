@@ -346,11 +346,25 @@
       "minLength": 1,
       "defaultValue": "[concat(parameters('deploymentId'), '-cd-hp')]"
     },
-  
+    "prcHostingPlanName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "[concat(parameters('deploymentId'), '-prc-hp')]"
+    },
+    "repHostingPlanName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "[concat(parameters('deploymentId'), '-rep-hp')]"
+    },
+    "xcBasicHostingPlanName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "[concat(parameters('deploymentId'), '-xc-basic-hp')]"
+    },
     "xcResourceIntensiveHostingPlanName": {
       "type": "string",
       "minLength": 1,
-      "defaultValue": "[concat(parameters('deploymentId'), '-xc-hp')]"
+      "defaultValue": "[concat(parameters('deploymentId'), '-xc-resourceintensive-hp')]"
     },
     "exmDdsHostingPlanName": {
       "type": "string",
@@ -631,10 +645,10 @@
             "value": "[parameters('cdHostingPlanName')]"
           },
           "prcHostingPlanName": {
-            "value": "[parameters('cmHostingPlanName')]"
+            "value": "[parameters('prcHostingPlanName')]"
           },
           "repHostingPlanName": {
-            "value": "[parameters('cmHostingPlanName')]"
+            "value": "[parameters('repHostingPlanName')]"
           },
 
           "cmWebAppName": {
@@ -707,7 +721,7 @@
           },
 
           "xcBasicHostingPlanName": {
-            "value": "[parameters('xcResourceIntensiveHostingPlanName')]"
+            "value": "[parameters('xcBasicHostingPlanName')]"
           },
           "xcResourceIntensiveHostingPlanName": {
             "value": "[parameters('xcResourceIntensiveHostingPlanName')]"
@@ -789,7 +803,7 @@
           },
 
           "xcBasicHostingPlanName": {
-            "value": "[parameters('xcResourceIntensiveHostingPlanName')]"
+            "value": "[parameters('xcBasicHostingPlanName')]"
           },
 
           "maOpsWebAppName": {
@@ -1549,9 +1563,9 @@
 
               "cmHostingPlanName": "[parameters('cmHostingPlanName')]",
               "cdHostingPlanName": "[parameters('cdHostingPlanName')]",
-              "prcHostingPlanName": "[parameters('cmHostingPlanName')]",
-              "repHostingPlanName": "[parameters('cmHostingPlanName')]",
-              "xcBasicHostingPlanName": "[parameters('xcResourceIntensiveHostingPlanName')]",
+              "prcHostingPlanName": "[parameters('prcHostingPlanName')]",
+              "repHostingPlanName": "[parameters('repHostingPlanName')]",
+              "xcBasicHostingPlanName": "[parameters('xcBasicHostingPlanName')]",
               "xcResourceIntensiveHostingPlanName": "[parameters('xcResourceIntensiveHostingPlanName')]",
 
               "cmWebAppName": "[parameters('cmWebAppName')]",
