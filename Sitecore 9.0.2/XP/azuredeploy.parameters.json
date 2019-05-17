@@ -1,9 +1,9 @@
-﻿{
+{
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "deploymentId": {
-      "value": "jagsasedemo"
+      "value": "jagsasetest"
     },
     "location": {
       "value": "Central US"
@@ -12,7 +12,7 @@
       "value": "Rams@0903"
     },
     "licenseXml": {
-      "value": "C:\Jagan\Sitecore\Installer\tools\sc902xp\license.xml"
+      "value": "C:\\Jagan\\Sitecore\\Installer\\tools\\sc902xp\\license.xml"
     },
     "repAuthenticationApiKey": {
       "value": "7D63FAB33201783B8591A52661AE9764E9212070"
@@ -51,7 +51,7 @@
       "value": "https://sc902wdps.blob.core.windows.net/scversions/sc902/Sitecore%209.0.2%20rev.%20180604%20(Cloud)_xp1marketingautomationreporting.scwdp.zip"
     }, 
     "authCertificateBlob":{
-      "value": "C:\Jagan\Sitecore\Installer\tools\sc902xp\scthumbprintcertificate.pfx"
+      "value": "C:\\Jagan\\Sitecore\\Installer\\tools\\sc902xp\\scthumbprintcertificate.pfx"
     },
     "authCertificatePassword":{
       "value": "Rams@0903"
