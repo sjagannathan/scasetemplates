@@ -5,7 +5,7 @@
     "resourcesApiVersion": "2016-09-01",
     "defaultDependency": [
       {
-        "name": "application"
+        "name": "[if(parameters('deployExmDds'), 'application-exm', 'application')]"
       }
     ],
     "dependencies": "[concat(variables('defaultDependency'), parameters('modules').items)]"
@@ -28,7 +28,7 @@
     "templateLinkBase": {
       "type": "string",
       "minLength": 1,
-      "defaultValue": "[uri(replace(deployment().properties.templateLink.uri,' ','%20'), '.')]"
+      "defaultValue": "[uri(replace(json(string(deployment().properties.templateLink)).uri,' ','%20'), '.')]"
     },
     "templateLinkAccessToken": {
       "type": "securestring",
@@ -126,6 +126,11 @@
       "minLength": 1,
       "defaultValue": "[concat(parameters('deploymentId'), '-forms-db')]"
     },
+    "exmMasterSqlDatabaseName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "[concat(parameters('deploymentId'), '-exmmaster-db')]"
+    },
     "shardMapManagerSqlDatabaseName": {
       "type": "string",
       "minLength": 1,
@@ -150,6 +155,11 @@
       "type": "string",
       "minLength": 1,
       "defaultValue": "[concat(parameters('deploymentId'), '-ma-db')]"
+    },
+    "messagingSqlDatabaseName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "[concat(parameters('deploymentId'), '-messaging-db')]"
     },
 
     "coreSqlDatabaseUserName": {
@@ -192,6 +202,16 @@
       "minLength": 8,
       "defaultValue": "[concat(toUpper(uniqueString('forms', parameters('passwordSalt'))), uniqueString('forms', parameters('sqlServerPassword'), parameters('passwordSalt')), toUpper(uniqueString('forms', parameters('sitecoreAdminPassword'), parameters('passwordSalt'))), '4@')]"
     },
+    "exmMasterSqlDatabaseUserName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "exmmasteruser"
+    },
+    "exmMasterSqlDatabasePassword": {
+      "type": "securestring",
+      "minLength": 8,
+      "defaultValue": "[concat(toUpper(uniqueString('exmmaster', parameters('passwordSalt'))), uniqueString('exmmaster', parameters('sqlServerPassword'), parameters('passwordSalt')), toUpper(uniqueString('exmmaster', parameters('sitecoreAdminPassword'), parameters('passwordSalt'))), '4@')]"
+    },
     "reportingSqlDatabaseUserName": {
       "type": "string",
       "minLength": 1,
@@ -201,7 +221,7 @@
       "type": "securestring",
       "minLength": 8,
       "defaultValue": "[concat(toUpper(uniqueString('reporting', parameters('passwordSalt'))), uniqueString('reporting', parameters('sqlServerPassword'), parameters('passwordSalt')), toUpper(uniqueString('reporting', parameters('sitecoreAdminPassword'), parameters('passwordSalt'))), '4@')]"
-    },    
+    },
     "poolsSqlDatabaseUserName": {
       "type": "string",
       "minLength": 1,
@@ -252,22 +272,51 @@
       "minLength": 8,
       "defaultValue": "[concat(toUpper(uniqueString('xcma', parameters('passwordSalt'))), uniqueString('xcma', parameters('sqlServerPassword'), parameters('passwordSalt')), toUpper(uniqueString('xcma', parameters('sitecoreAdminPassword'), parameters('passwordSalt'))), '4@')]"
     },
+    "messagingSqlDatabaseUserName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "messaginguser"
+    },
+    "messagingSqlDatabasePassword": {
+      "type": "securestring",
+      "minLength": 8,
+      "defaultValue": "[concat(toUpper(uniqueString('messaging', parameters('passwordSalt'))), uniqueString('messaging', parameters('sqlServerPassword'), parameters('passwordSalt')), toUpper(uniqueString('messaging', parameters('sitecoreAdminPassword'), parameters('passwordSalt'))), '4@')]"
+    },
 
     "redisCacheName": {
       "type": "string",
       "minLength": 1,
       "defaultValue": "[concat(parameters('deploymentId'), '-redis')]"
     },
+
     "searchServiceName": {
       "type": "string",
-      "minLength": 1,      
       "defaultValue": "[concat(parameters('deploymentId'), '-as')]"
     },
+    "searchServiceLocation": {
+      "type": "string",
+      "defaultValue": "[parameters('location')]"
+    },
+    "searchServiceReplicaCount": {
+      "type": "int",
+      "defaultValue": 1
+    },
+
     "xcSearchIndexName": {
       "type": "string",
       "minLength": 1,
       "defaultValue": "xdb"
     },
+
+    "solrConnectionString": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "xcSolrConnectionString": {
+      "type": "securestring",
+      "defaultValue": "[parameters('solrConnectionString')]"
+    },
+
     "applicationInsightsName": {
       "type": "string",
       "minLength": 1,
@@ -282,6 +331,10 @@
       "minLength": 1,
       "defaultValue": "[concat(parameters('deploymentId'), '-ai-pp')]"
     },
+    "applicationInsightsDataVolumeCap": {
+      "type": "string",
+      "defaultValue": ""
+    },
 
     "cmHostingPlanName": {
       "type": "string",
@@ -294,10 +347,14 @@
       "defaultValue": "[concat(parameters('deploymentId'), '-cd-hp')]"
     },
   
-   "xcResourceIntensiveHostingPlanName": {
+    "xcResourceIntensiveHostingPlanName": {
       "type": "string",
       "minLength": 1,
       "defaultValue": "[concat(parameters('deploymentId'), '-xc-hp')]"
+    },
+    "exmDdsHostingPlanName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('deploymentId'), '-exm-dds-hp')]"
     },
 
     "cmWebAppName": {
@@ -345,6 +402,10 @@
       "minLength": 1,
       "defaultValue": "[concat(parameters('deploymentId'), '-ma-rep')]"
     },
+    "exmDdsWebAppName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('deploymentId'), '-exm-dds')]"
+    },
 
     "cmMsDeployPackageUrl": {
       "type": "securestring"
@@ -373,6 +434,34 @@
     "maRepMsDeployPackageUrl": {
       "type": "securestring"
     },
+    "exmDdsMsDeployPackageUrl": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "exmCmMsDeployPackageUrl": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "bootloaderMsDeployPackageUrl": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+
+    "exmCryptographicKey": {
+      "type": "securestring",
+      "minLength": 64,
+      "defaultValue": "[toUpper(replace(concat(guid(uniqueString('exmCryptographicKey', parameters('sitecoreAdminPassword'), parameters('passwordSalt'))), guid(uniqueString('exmCryptographicKey', parameters('sqlServerPassword'), parameters('passwordSalt')))), '-',''))]"
+    },
+    "exmAuthenticationKey": {
+      "type": "securestring",
+      "minLength": 64,
+      "defaultValue": "[toUpper(replace(concat(guid(uniqueString('exmAuthenticationKey', parameters('sitecoreAdminPassword'), parameters('passwordSalt'))), guid(uniqueString('exmAuthenticationKey', parameters('sqlServerPassword'), parameters('passwordSalt')))), '-',''))]"
+    },
+    "exmInternalApiKey": {
+      "type": "securestring",
+      "minLength": 64,
+      "defaultValue": "[toUpper(replace(concat(guid(uniqueString('exmInternalApiKey', parameters('sitecoreAdminPassword'), parameters('passwordSalt'))), guid(uniqueString('exmInternalApiKey', parameters('sqlServerPassword'), parameters('passwordSalt')))), '-',''))]"
+    },
 
     "securityClientIp": {
       "type": "string",
@@ -393,7 +482,7 @@
 
     "allowInvalidClientCertificates": {
       "type": "bool",
-      "defaultValue":false
+      "defaultValue": false
     },
 
     "passwordSalt": {
@@ -422,6 +511,12 @@
       "minLength": 1,
       "defaultValue": ""
     },
+    "exmEdsProvider": {
+      "type": "string",
+      "minLength": 1,
+      "allowedValues": [ "CustomSMTP", "EmailCloud" ],
+      "defaultValue": "CustomSMTP"
+    },
 
     "deployPlatform": {
       "type": "bool",
@@ -431,39 +526,16 @@
       "type": "bool",
       "defaultValue": true
     },
-    "vNetName": {
-        "type": "string",
-        "minLength": 1,
-        "defaultValue": "[concat(parameters('deploymentId'), '-vnet')]"
-    },
-    "vNetSubnetName": {
-        "type": "string",
-        "minLength": 1,
-        "defaultValue": "[concat(parameters('deploymentId'), '-subnet')]"
-    },
-    "vNetAddressPrefix": {
-        "type": "string",
-        "minLength": 1,
-        "defaultValue": "10.0.0.0/24"
-    },
-    "aseName": {
-        "type": "string",
-        "minLength": 1,
-        "defaultValue": "[concat(parameters('deploymentId'), '-ase')]"
-    },
-    "aseIpSslCount": {
-        "type": "int",
-        "defaultValue": 1
-    },
-    "aseSize": {
-        "type": "string",
-        "allowedValues": [ "small", "medium", "large" ]
+    "deployExmDds": {
+      "type": "bool",
+      "defaultValue": false
     }
+
   },
   "resources": [
     {
       "apiVersion": "[variables('resourcesApiVersion')]",
-      "name": "[concat(deployment().name, '-infrastructure')]",
+      "name": "[concat(parameters('deploymentId'), '-infrastructure')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -519,9 +591,22 @@
           "formsSqlDatabaseName": {
             "value": "[parameters('formsSqlDatabaseName')]"
           },
-          
+          "exmMasterSqlDatabaseName": {
+            "value": "[parameters('exmMasterSqlDatabaseName')]"
+          },
+
+          "deployAzureSearch": {
+            "value": "[empty(parameters('solrConnectionString'))]"
+          },
+
           "searchServiceName": {
             "value": "[parameters('searchServiceName')]"
+          },
+          "searchServiceLocation": {
+            "value": "[parameters('searchServiceLocation')]"
+          },
+          "searchServiceReplicaCount": {
+            "value": "[parameters('searchServiceReplicaCount')]"
           },
           "redisCacheName": {
             "value": "[parameters('redisCacheName')]"
@@ -534,6 +619,9 @@
           },
           "applicationInsightsPricePlan": {
             "value": "[parameters('applicationInsightsPricePlan')]"
+          },
+          "applicationInsightsDataVolumeCap": {
+            "value": "[parameters('applicationInsightsDataVolumeCap')]"
           },
 
           "cmHostingPlanName": {
@@ -561,6 +649,7 @@
           "repWebAppName": {
             "value": "[parameters('repWebAppName')]"
           },
+
           "authCertificateName": {
             "value": "[parameters('authCertificateName')]"
           },
@@ -569,61 +658,18 @@
           },
           "authCertificatePassword": {
             "value": "[parameters('authCertificatePassword')]"
-          },
-          "aseName": {
-            "value": "[parameters('aseName')]"
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', concat(deployment().name, '-infrastructure-ase'))]"
-      ]
-    },
-    {
-      "apiVersion": "[variables('resourcesApiVersion')]",
-      "name": "[concat(deployment().name, '-infrastructure-ase')]",
-      "type": "Microsoft.Resources/deployments",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(uri(parameters('templateLinkBase'), 'nested/infrastructure-ase.json'), parameters('templateLinkAccessToken'))]"
-        },
-        "parameters": {
-          "deploymentId": {
-            "value": "[parameters('deploymentId')]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "vNetName": {
-            "value": "[parameters('vNetName')]"
-          },
-          "vNetSubnetName": {
-            "value": "[parameters('vNetSubnetName')]"
-          },
-          "vNetAddressPrefix": {
-            "value": "[parameters('vNetAddressPrefix')]"
-          },
-          "aseName": {
-            "value": "[parameters('aseName')]"
-          },
-          "aseIpSslCount": {
-            "value": "[parameters('aseIpSslCount')]"
-          },
-          "aseSize": {
-            "value": "[parameters('aseSize')]"
           }
         }
       }
     },
     {
       "apiVersion": "[variables('resourcesApiVersion')]",
-      "name": "[concat(deployment().name, '-infrastructure-xconnect')]",
+      "name": "[concat(parameters('deploymentId'), '-infrastructure-xc')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(uri(parameters('templateLinkBase'), 'nested/infrastructure-xconnect.json'), parameters('templateLinkAccessToken'))]"
+          "uri": "[concat(uri(parameters('templateLinkBase'), 'nested/infrastructure-xc.json'), parameters('templateLinkAccessToken'))]"
         },
         "parameters": {
           "deploymentId": {
@@ -656,13 +702,16 @@
           "refDataSqlDatabaseName": {
             "value": "[parameters('refDataSqlDatabaseName')]"
           },
+          "messagingSqlDatabaseName": {
+            "value": "[parameters('messagingSqlDatabaseName')]"
+          },
 
           "xcBasicHostingPlanName": {
             "value": "[parameters('xcResourceIntensiveHostingPlanName')]"
           },
           "xcResourceIntensiveHostingPlanName": {
             "value": "[parameters('xcResourceIntensiveHostingPlanName')]"
-          },         
+          },
 
           "xcRefDataWebAppName": {
             "value": "[parameters('xcRefDataWebAppName')]"
@@ -672,19 +721,44 @@
           },
           "xcSearchWebAppName": {
             "value": "[parameters('xcSearchWebAppName')]"
-          },
-          "aseName": {
-            "value": "[parameters('aseName')]"
           }
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', concat(deployment().name, '-infrastructure'))]"
+        "[resourceId('Microsoft.Resources/deployments', concat(parameters('deploymentId'), '-infrastructure'))]"
       ]
     },
     {
       "apiVersion": "[variables('resourcesApiVersion')]",
-      "name": "[concat(deployment().name, '-infrastructure-ma')]",
+      "name": "[concat(parameters('deploymentId'), '-infrastructure-exm')]",
+      "condition": "[parameters('deployExmDds')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(uri(parameters('templateLinkBase'), 'nested/infrastructure-exm.json'), parameters('templateLinkAccessToken'))]"
+        },
+        "parameters": {
+          "deploymentId": {
+            "value": "[parameters('deploymentId')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+
+          "exmDdsHostingPlanName": {
+            "value": "[parameters('exmDdsHostingPlanName')]"
+          },
+
+          "exmDdsWebAppName": {
+            "value": "[parameters('exmDdsWebAppName')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('resourcesApiVersion')]",
+      "name": "[concat(parameters('deploymentId'), '-infrastructure-ma')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -727,12 +801,12 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments',concat(deployment().name, '-infrastructure-xconnect'))]"
+        "[resourceId('Microsoft.Resources/deployments',concat(parameters('deploymentId'), '-infrastructure-xc'))]"
       ]
     },
     {
       "apiVersion": "[variables('resourcesApiVersion')]",
-      "name": "[concat(deployment().name, '-application')]",
+      "name": "[concat(parameters('deploymentId'), '-application')]",
       "condition": "[parameters('deployPlatform')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
@@ -742,7 +816,7 @@
         },
         "parameters": {
           "infrastructure": {
-            "value": "[reference(concat(deployment().name, '-infrastructure')).outputs.infrastructure.value]"
+            "value": "[reference(concat(parameters('deploymentId'), '-infrastructure')).outputs.infrastructure.value]"
           },
 
           "deploymentId": {
@@ -793,6 +867,12 @@
           "formsSqlDatabaseName": {
             "value": "[parameters('formsSqlDatabaseName')]"
           },
+          "exmMasterSqlDatabaseName": {
+            "value": "[parameters('exmMasterSqlDatabaseName')]"
+          },
+          "messagingSqlDatabaseName": {
+            "value": "[parameters('messagingSqlDatabaseName')]"
+          },
 
           "coreSqlDatabaseUserName": {
             "value": "[parameters('coreSqlDatabaseUserName')]"
@@ -817,13 +897,19 @@
           },
           "formsSqlDatabasePassword": {
             "value": "[parameters('formsSqlDatabasePassword')]"
-          },          
+          },
+          "exmMasterSqlDatabaseUserName": {
+            "value": "[parameters('exmMasterSqlDatabaseUserName')]"
+          },
+          "exmMasterSqlDatabasePassword": {
+            "value": "[parameters('exmMasterSqlDatabasePassword')]"
+          },
           "reportingSqlDatabaseUserName": {
             "value": "[parameters('reportingSqlDatabaseUserName')]"
           },
           "reportingSqlDatabasePassword": {
             "value": "[parameters('reportingSqlDatabasePassword')]"
-          },          
+          },
           "poolsSqlDatabaseUserName": {
             "value": "[parameters('poolsSqlDatabaseUserName')]"
           },
@@ -842,6 +928,12 @@
           "xcRefDataSqlDatabasePassword": {
             "value": "[parameters('xcRefDataSqlDatabasePassword')]"
           },
+          "messagingSqlDatabaseUserName": {
+            "value": "[parameters('messagingSqlDatabaseUserName')]"
+          },
+          "messagingSqlDatabasePassword": {
+            "value": "[parameters('messagingSqlDatabasePassword')]"
+          },
 
           "redisCacheName": {
             "value": "[parameters('redisCacheName')]"
@@ -849,6 +941,11 @@
           "searchServiceName": {
             "value": "[parameters('searchServiceName')]"
           },
+
+          "solrConnectionString": {
+            "value": "[parameters('solrConnectionString')]"
+          },
+
           "applicationInsightsName": {
             "value": "[parameters('applicationInsightsName')]"
           },
@@ -901,6 +998,13 @@
             "value": "[parameters('securityClientIpMask')]"
           },
 
+          "exmCryptographicKey": {
+            "value": "[parameters('exmCryptographicKey')]"
+          },
+          "exmAuthenticationKey": {
+            "value": "[parameters('exmAuthenticationKey')]"
+          },
+
           "telerikEncryptionKey": {
             "value": "[parameters('telerikEncryptionKey')]"
           },
@@ -908,29 +1012,37 @@
           "allowInvalidClientCertificates": {
             "value": "[parameters('allowInvalidClientCertificates')]"
           },
-          
+
           "passwordSalt": {
             "value": "[parameters('passwordSalt')]"
+          },
+
+          "exmEdsProvider": {
+            "value": "[parameters('exmEdsProvider')]"
           }
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', concat(deployment().name, '-application-ma'))]"
+        "[resourceId('Microsoft.Resources/deployments', concat(parameters('deploymentId'), '-application-ma'))]"
       ]
     },
     {
       "apiVersion": "[variables('resourcesApiVersion')]",
-      "name": "[concat(deployment().name, '-application-xconnect')]",
+      "name": "[concat(parameters('deploymentId'), '-application-xc')]",
       "condition": "[parameters('deployXConnect')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(uri(parameters('templateLinkBase'), 'nested/application-xconnect.json'), parameters('templateLinkAccessToken'))]"
+          "uri": "[concat(uri(parameters('templateLinkBase'), 'nested/application-xc.json'), parameters('templateLinkAccessToken'))]"
         },
         "parameters": {
           "infrastructure": {
-            "value": "[reference(concat(deployment().name, '-infrastructure')).outputs.infrastructure.value]"
+            "value": "[reference(concat(parameters('deploymentId'), '-infrastructure')).outputs.infrastructure.value]"
+          },
+
+          "templateLinkAccessToken": {
+            "value": "[parameters('templateLinkAccessToken')]"
           },
 
           "deploymentId": {
@@ -972,6 +1084,9 @@
           "maSqlDatabaseName": {
             "value": "[parameters('maSqlDatabaseName')]"
           },
+          "messagingSqlDatabaseName": {
+            "value": "[parameters('messagingSqlDatabaseName')]"
+          },
 
           "poolsSqlDatabaseUserName": {
             "value": "[parameters('poolsSqlDatabaseUserName')]"
@@ -997,6 +1112,12 @@
           "xcMaSqlDatabasePassword": {
             "value": "[parameters('xcMaSqlDatabasePassword')]"
           },
+          "messagingSqlDatabaseUserName": {
+            "value": "[parameters('messagingSqlDatabaseUserName')]"
+          },
+          "messagingSqlDatabasePassword": {
+            "value": "[parameters('messagingSqlDatabasePassword')]"
+          },
 
           "searchServiceName": {
             "value": "[parameters('searchServiceName')]"
@@ -1005,10 +1126,14 @@
             "value": "[parameters('xcSearchIndexName')]"
           },
 
+          "xcSolrConnectionString": {
+            "value": "[parameters('xcSolrConnectionString')]"
+          },
+          
           "applicationInsightsName": {
             "value": "[parameters('applicationInsightsName')]"
           },
-          
+
           "xcRefDataWebAppName": {
             "value": "[parameters('xcRefDataWebAppName')]"
           },
@@ -1028,7 +1153,7 @@
           "xcSearchMsDeployPackageUrl": {
             "value": "[parameters('xcSearchMsDeployPackageUrl')]"
           },
-          
+
           "allowInvalidClientCertificates": {
             "value": "[parameters('allowInvalidClientCertificates')]"
           },
@@ -1043,12 +1168,12 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', concat(deployment().name, '-infrastructure-ma'))]"
+        "[resourceId('Microsoft.Resources/deployments', concat(parameters('deploymentId'), '-infrastructure-ma'))]"
       ]
     },
     {
       "apiVersion": "[variables('resourcesApiVersion')]",
-      "name": "[concat(deployment().name, '-application-ma')]",
+      "name": "[concat(parameters('deploymentId'), '-application-ma')]",
       "condition": "[parameters('deployXConnect')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
@@ -1058,7 +1183,7 @@
         },
         "parameters": {
           "infrastructure": {
-            "value": "[reference(concat(deployment().name, '-infrastructure')).outputs.infrastructure.value]"
+            "value": "[reference(concat(parameters('deploymentId'), '-infrastructure')).outputs.infrastructure.value]"
           },
 
           "deploymentId": {
@@ -1094,6 +1219,9 @@
           "shardMapManagerSqlDatabaseName": {
             "value": "[parameters('shardMapManagerSqlDatabaseName')]"
           },
+          "messagingSqlDatabaseName" : {
+            "value" : "[parameters('messagingSqlDatabaseName')]"
+          },
 
           "poolsSqlDatabaseUserName": {
             "value": "[parameters('poolsSqlDatabaseUserName')]"
@@ -1119,6 +1247,12 @@
           "xcShardMapManagerSqlDatabasePassword": {
             "value": "[parameters('xcShardMapManagerSqlDatabasePassword')]"
           },
+          "messagingSqlDatabaseUserName" : {
+            "value" : "[parameters('messagingSqlDatabaseUserName')]"
+          },
+          "messagingSqlDatabasePassword" : {
+            "value" : "[parameters('messagingSqlDatabasePassword')]"
+          },
 
           "applicationInsightsName": {
             "value": "[parameters('applicationInsightsName')]"
@@ -1143,7 +1277,7 @@
           "maRepMsDeployPackageUrl": {
             "value": "[parameters('maRepMsDeployPackageUrl')]"
           },
-          
+
           "allowInvalidClientCertificates": {
             "value": "[parameters('allowInvalidClientCertificates')]"
           },
@@ -1158,7 +1292,179 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', concat(deployment().name, '-application-xconnect'))]"
+        "[resourceId('Microsoft.Resources/deployments', concat(parameters('deploymentId'), '-application-xc'))]"
+      ]
+    },
+    {
+      "apiVersion": "[variables('resourcesApiVersion')]",
+      "name": "[concat(parameters('deploymentId'), '-application-exm')]",
+      "condition": "[parameters('deployExmDds')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(uri(parameters('templateLinkBase'), 'nested/application-exm.json'), parameters('templateLinkAccessToken'))]"
+        },
+        "parameters": {
+          "infrastructure": {
+            "value": "[reference(concat(parameters('deploymentId'), '-infrastructure')).outputs.infrastructure.value]"
+          },
+
+          "sitecoreAdminPassword": {
+            "value": "[parameters('sitecoreAdminPassword')]"
+          },
+          "deploymentId": {
+            "value": "[parameters('deploymentId')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+
+          "licenseXml": {
+            "value": "[parameters('licenseXml')]"
+          },
+          "repAuthenticationApiKey": {
+            "value": "[parameters('repAuthenticationApiKey')]"
+          },
+
+          "sqlServerLogin": {
+            "value": "[parameters('sqlServerLogin')]"
+          },
+          "sqlServerPassword": {
+            "value": "[parameters('sqlServerPassword')]"
+          },
+
+          "coreSqlDatabaseName": {
+            "value": "[parameters('coreSqlDatabaseName')]"
+          },
+          "masterSqlDatabaseName": {
+            "value": "[parameters('masterSqlDatabaseName')]"
+          },
+          "webSqlDatabaseName": {
+            "value": "[parameters('webSqlDatabaseName')]"
+          },
+          "refDataSqlDatabaseName": {
+            "value": "[parameters('refDataSqlDatabaseName')]"
+          },
+          "formsSqlDatabaseName": {
+            "value": "[parameters('formsSqlDatabaseName')]"
+          },
+          "coreSqlDatabaseUserName": {
+            "value": "[parameters('coreSqlDatabaseUserName')]"
+          },
+          "coreSqlDatabasePassword": {
+            "value": "[parameters('coreSqlDatabasePassword')]"
+          },
+          "masterSqlDatabaseUserName": {
+            "value": "[parameters('masterSqlDatabaseUserName')]"
+          },
+          "masterSqlDatabasePassword": {
+            "value": "[parameters('masterSqlDatabasePassword')]"
+          },
+          "webSqlDatabaseUserName": {
+            "value": "[parameters('webSqlDatabaseUserName')]"
+          },
+          "webSqlDatabasePassword": {
+            "value": "[parameters('webSqlDatabasePassword')]"
+          },
+          "formsSqlDatabaseUserName": {
+            "value": "[parameters('formsSqlDatabaseUserName')]"
+          },
+          "formsSqlDatabasePassword": {
+            "value": "[parameters('formsSqlDatabasePassword')]"
+          },
+          "xcRefDataSqlDatabaseUserName": {
+            "value": "[parameters('xcRefDataSqlDatabaseUserName')]"
+          },
+          "xcRefDataSqlDatabasePassword": {
+            "value": "[parameters('xcRefDataSqlDatabasePassword')]"
+          },
+
+          "searchServiceName": {
+            "value": "[parameters('searchServiceName')]"
+          },
+
+          "solrConnectionString": {
+            "value": "[parameters('solrConnectionString')]"
+          },
+          
+          "applicationInsightsName": {
+            "value": "[parameters('applicationInsightsName')]"
+          },
+
+          "cmWebAppName": {
+            "value": "[parameters('cmWebAppName')]"
+          },
+          "prcWebAppName": {
+            "value": "[parameters('prcWebAppName')]"
+          },
+          "repWebAppName": {
+            "value": "[parameters('repWebAppName')]"
+          },
+          "xcSearchWebAppName": {
+            "value": "[parameters('xcSearchWebAppName')]"
+          },
+          "maOpsWebAppName": {
+            "value": "[parameters('maOpsWebAppName')]"
+          },
+          "maRepWebAppName": {
+            "value": "[parameters('maRepWebAppName')]"
+          },
+          "xcRefDataWebAppName": {
+            "value": "[parameters('xcRefDataWebAppName')]"
+          },
+          "exmDdsWebAppName": {
+            "value": "[parameters('exmDdsWebAppName')]"
+          },
+
+          "exmDdsMsDeployPackageUrl": {
+            "value": "[parameters('exmDdsMsDeployPackageUrl')]"
+          },
+          "exmCmMsDeployPackageUrl": {
+            "value": "[parameters('exmCmMsDeployPackageUrl')]"
+          },
+          "bootloaderMsDeployPackageUrl": {
+            "value": "[parameters('bootloaderMsDeployPackageUrl')]"
+          },
+
+          "securityClientIp": {
+            "value": "[parameters('securityClientIp')]"
+          },
+          "securityClientIpMask": {
+            "value": "[parameters('securityClientIpMask')]"
+          },
+
+          "exmCryptographicKey": {
+            "value": "[parameters('exmCryptographicKey')]"
+          },
+          "exmAuthenticationKey": {
+            "value": "[parameters('exmAuthenticationKey')]"
+          },
+          "exmInternalApiKey": {
+            "value": "[parameters('exmInternalApiKey')]"
+          },
+
+          "exmEdsProvider": {
+            "value": "[parameters('exmEdsProvider')]"
+          },
+
+          "telerikEncryptionKey": {
+            "value": "[parameters('telerikEncryptionKey')]"
+          },
+
+          "allowInvalidClientCertificates": {
+            "value": "[parameters('allowInvalidClientCertificates')]"
+          },
+
+          "passwordSalt": {
+            "value": "[parameters('passwordSalt')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', concat(parameters('deploymentId'), '-infrastructure'))]",
+        "[resourceId('Microsoft.Resources/deployments', concat(parameters('deploymentId'), '-infrastructure-exm'))]",
+        "[resourceId('Microsoft.Resources/deployments', concat(parameters('deploymentId'), '-application'))]"
       ]
     },
     {
@@ -1166,7 +1472,7 @@
         "name": "modules",
         "count": "[length(parameters('modules').items)]"
       },
-      "name": "[concat(deployment().name, '-', parameters('modules').items[copyIndex()].name)]",
+      "name": "[concat(parameters('deploymentId'), '-', parameters('modules').items[copyIndex()].name)]",
       "condition": "[parameters('deployPlatform')]",
       "apiVersion": "[variables('resourcesApiVersion')]",
       "type": "Microsoft.Resources/deployments",
@@ -1178,7 +1484,7 @@
         "parameters": {
           "standard": {
             "value": {
-              "infrastructure": "[reference(concat(deployment().name, '-infrastructure')).outputs.infrastructure.value]",
+              "infrastructure": "[reference(concat(parameters('deploymentId'), '-infrastructure')).outputs.infrastructure.value]",
 
               "deploymentId": "[parameters('deploymentId')]",
               "location": "[parameters('location')]",
@@ -1204,6 +1510,7 @@
               "shard0SqlDatabaseName": "[parameters('shard0SqlDatabaseName')]",
               "shard1SqlDatabaseName": "[parameters('shard1SqlDatabaseName')]",
               "refDataSqlDatabaseName": "[parameters('refDataSqlDatabaseName')]",
+              "messagingSqlDatabaseName": "[parameters('messagingSqlDatabaseName')]",
 
               "maSqlDatabaseName": "[parameters('maSqlDatabaseName')]",
 
@@ -1212,9 +1519,9 @@
               "masterSqlDatabaseUserName": "[parameters('masterSqlDatabaseUserName')]",
               "masterSqlDatabasePassword": "[parameters('masterSqlDatabasePassword')]",
               "webSqlDatabaseUserName": "[parameters('webSqlDatabaseUserName')]",
-              "webSqlDatabasePassword": "[parameters('webSqlDatabasePassword')]",             
+              "webSqlDatabasePassword": "[parameters('webSqlDatabasePassword')]",
               "reportingSqlDatabaseUserName": "[parameters('reportingSqlDatabaseUserName')]",
-              "reportingSqlDatabasePassword": "[parameters('reportingSqlDatabasePassword')]",              
+              "reportingSqlDatabasePassword": "[parameters('reportingSqlDatabasePassword')]",
               "poolsSqlDatabaseUserName": "[parameters('poolsSqlDatabaseUserName')]",
               "poolsSqlDatabasePassword": "[parameters('poolsSqlDatabasePassword')]",
               "tasksSqlDatabaseUserName": "[parameters('tasksSqlDatabaseUserName')]",
@@ -1225,10 +1532,18 @@
               "xcShardMapManagerSqlDatabasePassword": "[parameters('xcShardMapManagerSqlDatabasePassword')]",
               "xcMaSqlDatabaseUserName": "[parameters('xcMaSqlDatabaseUserName')]",
               "xcMaSqlDatabasePassword": "[parameters('xcMaSqlDatabasePassword')]",
-              
-              "searchServiceName": "[parameters('searchServiceName')]",              
+              "messagingSqlDatabaseUserName": "[parameters('messagingSqlDatabaseUserName')]",
+              "messagingSqlDatabasePassword": "[parameters('messagingSqlDatabasePassword')]",
+
+              "searchServiceName": "[parameters('searchServiceName')]",
+              "searchServiceLocation": "[parameters('searchServiceLocation')]",
               "xcSearchIndexName": "[parameters('xcSearchIndexName')]",              
+
+              "solrConnectionString": "[parameters('solrConnectionString')]",
+              "xcSolrConnectionString": "[parameters('xcSolrConnectionString')]",
+
               "redisCacheName": "[parameters('redisCacheName')]",
+              
               "applicationInsightsName": "[parameters('applicationInsightsName')]",
               "applicationInsightsLocation": "[parameters('applicationInsightsLocation')]",
 
@@ -1237,7 +1552,7 @@
               "prcHostingPlanName": "[parameters('cmHostingPlanName')]",
               "repHostingPlanName": "[parameters('cmHostingPlanName')]",
               "xcBasicHostingPlanName": "[parameters('xcResourceIntensiveHostingPlanName')]",
-              "xcResourceIntensiveHostingPlanName": "[parameters('xcResourceIntensiveHostingPlanName')]",              
+              "xcResourceIntensiveHostingPlanName": "[parameters('xcResourceIntensiveHostingPlanName')]",
 
               "cmWebAppName": "[parameters('cmWebAppName')]",
               "cdWebAppName": "[parameters('cdWebAppName')]",
@@ -1264,7 +1579,7 @@
         }
       },
       "dependsOn": [
-        "[concat(deployment().name, '-' , variables('dependencies')[copyIndex()].name)]"
+        "[concat(parameters('deploymentId'), '-' , variables('dependencies')[copyIndex()].name)]"
       ]
     }
   ]
